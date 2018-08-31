@@ -14,29 +14,31 @@ import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : AppCompatActivity() {
 
-    val mFragments = listOf<BaseFragment>(HomeFragment.getInstance(), KnowledgeFragment.getInstance(),
-            NavigationFragment.getInstance(), ProjectFragment.getInstance())
+    val mFragments = mutableListOf<BaseFragment>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
 
-//        initFragment()
+        initFragment()
         //设置默认的Item
         setDefaultFragment()
     }
 
 
     private fun initFragment() {
-
+        mFragments.add(HomeFragment.getInstance())
+        mFragments.add(KnowledgeFragment.getInstance())
+        mFragments.add(NavigationFragment.getInstance())
+        mFragments.add(ProjectFragment.getInstance())
 
     }
 
     private fun setDefaultFragment() {
         val fm = supportFragmentManager
         val transaction = fm.beginTransaction()
-        transaction.replace(R.id.container, mFragments[0])
+        transaction.replace(R.id.container, mFragments.get(0))
         transaction.commit()
     }
 
@@ -58,6 +60,22 @@ class MainActivity : AppCompatActivity() {
         }.apply {
             setTabSelectedListener(object : BottomNavigationBar.OnTabSelectedListener {
                 override fun onTabReselected(position: Int) {
+
+                }
+
+                override fun onTabUnselected(position: Int) {
+                    if (position < mFragments.size) {
+                        val fm = supportFragmentManager
+                        val ft = fm.beginTransaction()
+//                        val fragment = mFragments[position]
+                        val fragment = mFragments.get(position)
+                        // 隐藏当前的fragment
+                        ft.hide(fragment)
+                        ft.commitAllowingStateLoss()
+                    }
+                }
+
+                override fun onTabSelected(position: Int) {
                     if (position < mFragments.size) {
                         val fm = supportFragmentManager
                         val ft = fm.beginTransaction()
@@ -72,26 +90,10 @@ class MainActivity : AppCompatActivity() {
                             ft.hide(from).add(R.id.container, fragment)
                             if (fragment.isHidden) {
                                 ft.show(fragment)
-
                             }
                         }
                         ft.commitAllowingStateLoss()
                     }
-                }
-
-                override fun onTabUnselected(position: Int) {
-                    if (position < mFragments.size) {
-                        val fm = supportFragmentManager
-                        val ft = fm.beginTransaction()
-                        val fragment = mFragments[position]
-                        // 隐藏当前的fragment
-                        ft.hide(fragment)
-                        ft.commitAllowingStateLoss()
-                    }
-                }
-
-                override fun onTabSelected(position: Int) {
-
                 }
 
             })
